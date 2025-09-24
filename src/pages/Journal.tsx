@@ -1,6 +1,5 @@
 // src/pages/Journal.tsx
 import { useMemo, useState } from "react";
-import CalmBlobsBG from "@/components/CalmBlobsBG";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,7 +44,6 @@ export default function Journal() {
 
   return (
     <div className="relative min-h-screen bg-black text-white">
-      <CalmBlobsBG />
 
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-10">
         {/* Heading */}

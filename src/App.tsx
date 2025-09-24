@@ -19,11 +19,12 @@ export default function App() {
           style={{ minHeight: "100vh", maxHeight: "100vh", width: "100%" }}
         >
           <Ballpit
-            count={200}
-            gravity={0.7}
-            friction={0.8}
+            count={150}
+            gravity={0.05}
+            friction={0.9975}
             wallBounce={0.95}
             followCursor={true}
+            colors={[0x96a78d, 0xb6ceb4, 0xd9e9cf]}
           />
         </div>
       )}
