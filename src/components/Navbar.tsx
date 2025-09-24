@@ -9,7 +9,7 @@ export default function Navbar() {
     "text-white bg-white/20 border border-white/30 shadow-sm";
 
   return (
-    <header className="sticky top-0 z-50 bg-black">
+    <header className="sticky top-0 z-50 bg-black pt-4">
       <nav className="mx-auto w-[95%] rounded-2xl border border-white/20 bg-black backdrop-blur-md shadow-lg">
         <div className="flex items-center justify-between px-4 py-2">
           <Link to="/" className="text-white font-semibold tracking-tight">
