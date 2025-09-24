@@ -10,7 +10,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-black">
-      <nav className="mx-auto mt-4 w-[95%] rounded-2xl border border-white/20 bg-black backdrop-blur-md shadow-lg">
+      <nav className="mx-auto w-[95%] rounded-2xl border border-white/20 bg-black backdrop-blur-md shadow-lg">
         <div className="flex items-center justify-between px-4 py-2">
           <Link to="/" className="text-white font-semibold tracking-tight">
             PanicPal

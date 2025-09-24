@@ -1,11 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import Vapi from '@vapi-ai/web';
 
-// Helper to get environment variables (Vite uses import.meta.env)
-const getEnvVar = (key: string): string | undefined => {
-  return import.meta.env[key] || (window as any).__env?.[key];
-};
-
 interface VapiConfig {
   publicKey: string;
   assistantId: string;

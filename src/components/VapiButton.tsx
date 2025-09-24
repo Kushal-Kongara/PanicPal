@@ -1,5 +1,5 @@
-import React from 'react';
-import { useVapi } from '../hooks/useVapi';
+import React from "react";
+import { useVapi } from "../hooks/useVapi";
 
 interface VapiButtonProps {
   publicKey?: string;
@@ -7,6 +7,12 @@ interface VapiButtonProps {
   baseUrl?: string;
   className?: string;
   children?: React.ReactNode;
+  // Optional props to use external Vapi state
+  startCall?: () => Promise<void>;
+  endCall?: () => void;
+  isSessionActive?: boolean;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 export const VapiButton: React.FC<VapiButtonProps> = ({
@@ -15,12 +21,25 @@ export const VapiButton: React.FC<VapiButtonProps> = ({
   baseUrl = import.meta.env.VITE_VAPI_BASE_URL,
   className,
   children,
+  // External state props
+  startCall: externalStartCall,
+  endCall: externalEndCall,
+  isSessionActive: externalIsSessionActive,
+  isLoading: externalIsLoading,
+  error: externalError,
 }) => {
-  const { startCall, endCall, isSessionActive, isLoading, error } = useVapi({
-    publicKey: publicKey || '',
-    assistantId: assistantId || '',
+  // Use external state if provided, otherwise use internal useVapi hook
+  const internalVapi = useVapi({
+    publicKey: publicKey || "",
+    assistantId: assistantId || "",
     baseUrl,
   });
+
+  const startCall = externalStartCall || internalVapi.startCall;
+  const endCall = externalEndCall || internalVapi.endCall;
+  const isSessionActive = externalIsSessionActive ?? internalVapi.isSessionActive;
+  const isLoading = externalIsLoading ?? internalVapi.isLoading;
+  const error = externalError ?? internalVapi.error;
 
   const handleClick = () => {
     if (isSessionActive) {
@@ -43,15 +62,19 @@ export const VapiButton: React.FC<VapiButtonProps> = ({
       <button
         onClick={handleClick}
         disabled={isLoading}
-        className={className || "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"}
+        className={
+          className ||
+          "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+        }
       >
-        {children || (isLoading ? 'Connecting...' : isSessionActive ? 'End Call' : 'Start Call')}
+        {children ||
+          (isLoading
+            ? "Connecting..."
+            : isSessionActive
+            ? "End Call"
+            : "Talk to me")}
       </button>
-      {error && (
-        <div className="text-red-500 mt-2 text-sm">
-          Error: {error}
-        </div>
-      )}
+      {error && <div className="text-red-500 mt-2 text-sm">Error: {error}</div>}
     </>
   );
 };
