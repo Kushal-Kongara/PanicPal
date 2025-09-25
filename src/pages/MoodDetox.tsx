@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
-import { Play, Pause, Volume2, Waves, Sparkles } from "lucide-react";
+import { Play, Pause, Volume2, Waves, Sparkles, Quote, Heart, Plus } from "lucide-react";
 
 type Track = { id: string; name: string; src: string };
 
@@ -60,6 +60,34 @@ export default function MoodDetox() {
   const [volume, setVolume] = useState<number>(70);
   const [loop, setLoop] = useState(true);
   const [showBreath, setShowBreath] = useState(true);
+  const [gratitudeItems, setGratitudeItems] = useState<string[]>([]);
+  const [newGratitudeItem, setNewGratitudeItem] = useState("");
+
+  // Sample quotes - in a real app, this could be fetched from an API
+  const quotes = [
+    { text: "The present moment is the only time over which we have dominion.", author: "Thích Nhất Hạnh" },
+    { text: "Peace comes from within. Do not seek it without.", author: "Buddha" },
+    { text: "Wherever you are, be there totally.", author: "Eckhart Tolle" },
+    { text: "The best way to take care of the future is to take care of the present moment.", author: "Thích Nhất Hạnh" },
+    { text: "Mindfulness is about being fully awake in our lives.", author: "Jon Kabat-Zinn" }
+  ];
+
+  // Get today's quote based on the day of the year
+  const todaysQuote = useMemo(() => {
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    return quotes[dayOfYear % quotes.length];
+  }, []);
+
+  const addGratitudeItem = () => {
+    if (newGratitudeItem.trim()) {
+      setGratitudeItems([...gratitudeItems, newGratitudeItem.trim()]);
+      setNewGratitudeItem("");
+    }
+  };
+
+  const removeGratitudeItem = (index: number) => {
+    setGratitudeItems(gratitudeItems.filter((_, i) => i !== index));
+  };
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const current = useMemo(
@@ -113,15 +141,15 @@ export default function MoodDetox() {
           <div className="text-sm text-white/60">designed for calm, focus, and reset</div>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-2">
           {/* Sound card */}
-          <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+          <Card className="bg-white/5 border-white/10 backdrop-blur-xl h-80">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Waves className="h-5 w-5" /> Soothing soundscape
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-5 flex flex-col h-full">
               <div className="flex flex-col gap-3">
                 <Label className="text-white/80">Track</Label>
                 <Select value={selected} onValueChange={setSelected}>
@@ -172,11 +200,11 @@ export default function MoodDetox() {
           </Card>
 
           {/* Breath + quick reset */}
-          <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+          <Card className="bg-white/5 border-white/10 backdrop-blur-xl h-80">
             <CardHeader>
               <CardTitle>Reset the nervous system</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 flex flex-col h-full justify-center">
               <BreathGuide enabled={showBreath} />
               <div className="flex items-center gap-3">
                 <Switch checked={showBreath} onCheckedChange={setShowBreath} id="breathe" />
@@ -189,11 +217,76 @@ export default function MoodDetox() {
           </Card>
         </div>
 
-        {/* Minimal footer note */}
-        <div className="mt-8 text-center text-xs text-white/50">
-          Sound loops are loaded from <code className="bg-white/10 px-1 rounded">/public/audio</code>.
-          Replace with your own for your vibe.
+        {/* New cards row */}
+        <div className="grid gap-6 lg:grid-cols-2 mt-6">
+          {/* Quote of the Day card */}
+          <Card className="bg-white/5 border-white/10 backdrop-blur-xl h-80">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Quote className="h-5 w-5" /> Quote of the Day
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 flex flex-col h-full justify-center">
+              <blockquote className="text-white/90 italic text-lg leading-relaxed">
+                "{todaysQuote.text}"
+              </blockquote>
+              <cite className="text-white/70 text-sm block text-right">
+                — {todaysQuote.author}
+              </cite>
+            </CardContent>
+          </Card>
+
+          {/* Gratitude card */}
+          <Card className="bg-white/5 border-white/10 backdrop-blur-xl h-80">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Heart className="h-5 w-5" /> Things You Are Grateful For
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 flex flex-col h-full">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newGratitudeItem}
+                  onChange={(e) => setNewGratitudeItem(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addGratitudeItem()}
+                  placeholder="What are you grateful for today?"
+                  className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+                />
+                <Button
+                  onClick={addGratitudeItem}
+                  className="bg-white/20 hover:bg-white/30 text-white px-3"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {gratitudeItems.length > 0 && (
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {gratitudeItems.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between bg-white/10 rounded-lg p-2">
+                      <span className="text-white/90 text-sm">{item}</span>
+                      <button
+                        onClick={() => removeGratitudeItem(index)}
+                        className="text-white/70 hover:text-white text-xs ml-2"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {gratitudeItems.length === 0 && (
+                <p className="text-white/70 text-sm text-center py-4">
+                  Add something you're grateful for to get started
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </div>
+
+
       </div>
     </div>
   );

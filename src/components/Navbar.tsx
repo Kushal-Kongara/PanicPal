@@ -21,7 +21,7 @@ export default function Navbar() {
               <Home className="h-4 w-4" /> Home
             </NavLink>
             <NavLink to="/panic" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
-              <HeartPulse className="h-4 w-4" /> Panic
+              <HeartPulse className="h-4 w-4" /> Panic Support
             </NavLink>
             <NavLink to="/journal" className={({ isActive }) => `${base} ${isActive ? active : inactive}`}>
               <NotebookPen className="h-4 w-4" /> Journal

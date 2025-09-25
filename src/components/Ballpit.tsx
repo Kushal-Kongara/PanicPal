@@ -554,6 +554,8 @@ const DEFAULT_SPHERES_CONFIG: SpheresConfig = {
     roughness: 0.3,
     clearcoat: 0.5,
     clearcoatRoughness: 0.1,
+    transparent: true,
+    opacity: 0.3,
   },
   minSize: 0.5,
   maxSize: 1,
