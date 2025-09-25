@@ -114,17 +114,19 @@ export default function App() {
                 followCursor={true}
                 minSize={0.5}
                 maxSize={1.2}
-                colors={[0x9c43fe, 0x4cc2e9, 0x101499]}
-                ambientIntensity={0.6}
-                materialParams={{
-                  metalness: 0.05,
-                  roughness: 0.2,
-                  clearcoat: 0.2,
-                  clearcoatRoughness: 0.1,
-                }}
+                colors={[0x9333ea, 0x38bdf8, 0xf8fafc]}
+        ambientIntensity={0.6}
+        materialParams={{
+          metalness: 0.9,
+          roughness: 0.1,
+          clearcoat: 1.0,
+          clearcoatRoughness: 0.05,
+          transparent: false,
+          opacity: 1.0,
+        }}
               />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/40 pointer-events-none z-5" />
+
           </>
         )}
 

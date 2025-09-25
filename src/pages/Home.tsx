@@ -6,7 +6,7 @@ export default function Home() {
           Welcome to PanicPal
         </h1>
         <p className="text-white/50 animate-fade-in-up-delay">
-          Calm visuals • Mood detox • Journal • Panic support
+          Panic support • Journal • Mood detox
         </p>
       </div>
     </main>
