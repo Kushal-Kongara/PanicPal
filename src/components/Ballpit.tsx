@@ -349,6 +349,12 @@ class W {
   velocityData: Float32Array;
   sizeData: Float32Array;
   center: Vector3 = new Vector3();
+  
+  // Transition state management
+  transitionDuration: number = 3000; // 3 seconds
+  transitionStartTime: number = Date.now();
+  transitionProgress: number = 0;
+  isTransitioning: boolean = true;
 
   constructor(config: WConfig) {
     this.config = config;
@@ -356,6 +362,7 @@ class W {
     this.velocityData = new Float32Array(3 * config.count).fill(0);
     this.sizeData = new Float32Array(config.count).fill(1);
     this.center = new Vector3();
+    this.transitionStartTime = Date.now();
     this.#initializePositions();
     this.setSizes();
   }
@@ -363,11 +370,16 @@ class W {
   #initializePositions() {
     const { config, positionData } = this;
     this.center.toArray(positionData, 0);
+    
+    // Start balls in a more centered/clustered position for smooth transition
+    const clusterRadius = Math.min(config.maxX, config.maxY, config.maxZ) * 0.3;
+    
     for (let i = 1; i < config.count; i++) {
       const idx = 3 * i;
-      positionData[idx] = MathUtils.randFloatSpread(2 * config.maxX);
-      positionData[idx + 1] = MathUtils.randFloatSpread(2 * config.maxY);
-      positionData[idx + 2] = MathUtils.randFloatSpread(2 * config.maxZ);
+      // Use smaller initial spread for clustered start
+      positionData[idx] = MathUtils.randFloatSpread(clusterRadius * 2);
+      positionData[idx + 1] = MathUtils.randFloatSpread(clusterRadius * 2);
+      positionData[idx + 2] = MathUtils.randFloatSpread(clusterRadius * 0.5);
     }
   }
 
@@ -381,6 +393,17 @@ class W {
 
   update(deltaInfo: { delta: number }) {
     const { config, center, positionData, sizeData, velocityData } = this;
+    
+    // Update transition progress
+    const currentTime = Date.now();
+    const elapsed = currentTime - this.transitionStartTime;
+    this.transitionProgress = Math.min(elapsed / this.transitionDuration, 1);
+    this.isTransitioning = this.transitionProgress < 1;
+    
+    // Smooth easing function for transition
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+    const transitionFactor = easeOutCubic(this.transitionProgress);
+    
     let startIdx = 0;
     if (config.controlSphere0) {
       startIdx = 1;
@@ -392,9 +415,14 @@ class W {
       const base = 3 * idx;
       const pos = new Vector3().fromArray(positionData, base);
       const vel = new Vector3().fromArray(velocityData, base);
-      vel.y -= deltaInfo.delta * config.gravity * sizeData[idx];
+      
+      // Gradually introduce physics effects based on transition progress
+      const scaledGravity = config.gravity * transitionFactor;
+      const scaledMaxVelocity = config.maxVelocity * (0.1 + 0.9 * transitionFactor);
+      
+      vel.y -= deltaInfo.delta * scaledGravity * sizeData[idx];
       vel.multiplyScalar(config.friction);
-      vel.clampLength(0, config.maxVelocity);
+      vel.clampLength(0, scaledMaxVelocity);
       pos.add(vel);
       pos.toArray(positionData, base);
       vel.toArray(velocityData, base);
@@ -519,13 +547,13 @@ const DEFAULT_SPHERES_CONFIG: SpheresConfig = {
   count: 200,
   colors: [0x00ffff, 0x00ff99, 0x0066ff],
   ambientColor: 0xffffff,
-  ambientIntensity: 1,
-  lightIntensity: 200,
+  ambientIntensity: 0.3,
+  lightIntensity: 150,
   materialParams: {
-    metalness: 0.5,
-    roughness: 0.5,
-    clearcoat: 1,
-    clearcoatRoughness: 0.15,
+    metalness: 0.1,
+    roughness: 0.3,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.1,
   },
   minSize: 0.5,
   maxSize: 1,
@@ -715,7 +743,8 @@ class Z extends InstancedMesh {
   #setupLights() {
     this.ambientLight = new AmbientLight(this.config.ambientColor, this.config.ambientIntensity);
     this.add(this.ambientLight);
-    this.light = new PointLight(this.config.colors[0], this.config.lightIntensity);
+    this.light = new PointLight(0xffffff, this.config.lightIntensity);
+    this.light.position.set(0, 0, 10);
     this.add(this.light);
   }
 
@@ -753,8 +782,9 @@ class Z extends InstancedMesh {
 
       for (let idx = 0; idx < this.count; idx++) {
         this.setColorAt(idx, colorUtils.getColorAt(idx / this.count));
-        if (idx === 0) this.light!.color.copy(colorUtils.getColorAt(idx / this.count));
       }
+      // Set light to neutral white instead of copying from first sphere
+      this.light!.color.setHex(0xffffff);
       if (!this.instanceColor) return;
       this.instanceColor.needsUpdate = true;
     }
@@ -762,17 +792,28 @@ class Z extends InstancedMesh {
 
   update(deltaInfo: { delta: number }) {
     this.physics.update(deltaInfo);
+    
+    // Get transition progress for smooth appearance animation
+    const transitionProgress = this.physics.transitionProgress;
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+    const appearanceFactor = easeOutCubic(transitionProgress);
+    
     for (let idx = 0; idx < this.count; idx++) {
       U.position.fromArray(this.physics.positionData, 3 * idx);
       if (idx === 0 && this.config.followCursor === false) {
         U.scale.setScalar(0);
       } else {
-        U.scale.setScalar(this.physics.sizeData[idx]);
+        // Apply smooth scale animation during transition
+        const baseScale = this.physics.sizeData[idx];
+        const transitionScale = this.physics.isTransitioning ? 
+          baseScale * (0.1 + 0.9 * appearanceFactor) : baseScale;
+        U.scale.setScalar(transitionScale);
       }
       U.updateMatrix();
       this.setMatrixAt(idx, U.matrix);
-      if (idx === 0) this.light!.position.copy(U.position);
     }
+    // Keep light at a fixed position instead of following the first sphere
+    this.light!.position.set(0, 0, 15);
     this.instanceMatrix.needsUpdate = true;
   }
 }
