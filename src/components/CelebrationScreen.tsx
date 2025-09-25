@@ -33,7 +33,7 @@ export const CelebrationScreen: React.FC<CelebrationScreenProps> = ({
     if (isVisible) {
       // Trigger fade-in animation
       setTimeout(() => setIsScreenVisible(true), 50);
-      
+
       const quoteInterval = setInterval(() => {
         setIsQuoteFading(true);
 
@@ -55,12 +55,12 @@ export const CelebrationScreen: React.FC<CelebrationScreenProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed top-0 left-0 right-0 bottom-0 z-40 flex items-center justify-center bg-black transition-all duration-500 ease-out ${
-      isScreenVisible 
-        ? "opacity-100 scale-100" 
-        : "opacity-0 scale-95"
-    }`}>
-      {/* Aurora starting from navbar */}
+    <div
+      className={`fixed inset-0 z-40 flex items-center justify-center bg-black transition-all duration-500 ease-out ${
+        isScreenVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
+    >
+      {/* Aurora starting from very top of screen including padding */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-60">
         <Aurora
           colorStops={["#8B5CF6", "#3B82F6", "#8B5CF6"]}
@@ -71,11 +71,13 @@ export const CelebrationScreen: React.FC<CelebrationScreenProps> = ({
       </div>
 
       {/* Main Content */}
-      <div className={`relative max-w-2xl mx-auto px-6 text-center mt-16 transition-all duration-700 ease-out delay-200 ${
-        isScreenVisible 
-          ? "opacity-100 translate-y-0" 
-          : "opacity-0 translate-y-8"
-      }`}>
+      <div
+        className={`relative max-w-2xl mx-auto px-6 text-center mt-16 transition-all duration-700 ease-out delay-200 ${
+          isScreenVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-8"
+        }`}
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -92,7 +94,7 @@ export const CelebrationScreen: React.FC<CelebrationScreenProps> = ({
           </div>
 
           <h1
-            className={`text-3xl md:text-4xl font-semibold text-white mb-4 transition-all duration-700 ease-in-out min-h-[3rem] flex items-center justify-center transform ${
+            className={`text-3xl md:text-4xl font-semibold text-white/70 mb-4 transition-all duration-700 ease-in-out min-h-[3rem] flex items-center justify-center transform ${
               isQuoteFading
                 ? "opacity-0 translate-y-2 scale-95"
                 : "opacity-100 translate-y-0 scale-100"
